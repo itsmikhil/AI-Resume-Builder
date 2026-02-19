@@ -3,14 +3,14 @@ import validator from "validator";
 import jwt from "jsonwebtoken";
 import userModel from "../models/user.js";
 
-let generateToken = (email, id) => {
+const generateToken = (email, id) => {
   let token = jwt.sign({ email, id }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
   return token;
 };
 
-let handleUserRegisteration = async (req, res) => {
+const handleUserRegisteration = async (req, res) => {
   try {
     let { name, email, password } = req.body;
 
@@ -68,7 +68,7 @@ let handleUserRegisteration = async (req, res) => {
   }
 };
 
-let handleUserSignIn = async (req, res) => {
+const handleUserSignIn = async (req, res) => {
   try {
     let { email, password } = req.body;
 
@@ -119,4 +119,27 @@ let handleUserSignIn = async (req, res) => {
   }
 };
 
-export default { handleUserRegisteration, handleUserSignIn };
+const getUserByUserId = async (req, res) => {
+  try {
+    let { id } = req.user;
+    let result = await userModel.findById(id);
+    if (!result) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+    }
+    result.password = undefined;
+    return res.status(200).json({
+      message: "User Found",
+      success: true,
+      user: result,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export default { handleUserRegisteration, handleUserSignIn,getUserByUserId };
