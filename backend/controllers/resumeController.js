@@ -1,4 +1,7 @@
+import imagekit from "../configs/imageKit.js";
 import resumeModel from "../models/resume.js";
+// used in imagekit integration
+import fs from "fs";
 
 const createResume = async (req, res) => {
   try {
@@ -88,8 +91,46 @@ let updateResumeTitle = async (req, res) => {
 let updateResume = async (req, res) => {
   try {
     let { id } = req.user;
-    let { formData, resumeId, removeBackground } = req.body;
-    
+    let { resumeData, resumeId, removeBackground } = req.body;
+    let image = req.file;
+    let resumeDataCopy;
+
+    if (typeof resumeData === "string") {
+      resumeDataCopy = await JSON.parse(resumeData);
+    } else {
+      resumeDataCopy = structuredClone(resumeData);
+    }
+
+    if (image) {
+      const imageBufferData = fs.createReadStream(image.path);
+
+      const response = await imagekit.files.upload({
+        file: imageBufferData,
+        fileName: "resume.png",
+        folder: "user-resumes",
+        transformation: {
+          // width and height given to image
+          // fo-face -> focuses on face
+          // z-0.45 -> zoom out so that face is visible properly
+          // if user has asked to remove background then we also remove background
+          pre:
+            "w-300,h-300,fo-face,z-0.45" +
+            (removeBackground ? ",e-bgremove" : ""),
+        },
+      });
+
+      resumeDataCopy.personal_info.image = response.url;
+    }
+
+    let result = await resumeModel.findOneAndUpdate(
+      { userId: id, resumeId },
+      resumeDataCopy,
+      { new: true },
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Saved successfully", result });
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -97,3 +138,4 @@ let updateResume = async (req, res) => {
     });
   }
 };
+

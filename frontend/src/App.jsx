@@ -6,7 +6,6 @@ import Preview from "./pages/Preview";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./pages/Layout";
-// import ResumeBuilder from "./pages/ResumeBuilder";
 
 const App = () => {
   return (
