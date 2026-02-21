@@ -15,6 +15,9 @@ const DataContextProvider = ({ children }) => {
   const [userPassword, setuserPassword] = useState("");
   const [resumeTitle, setresumeTitle] = useState("");
   const [allResumes, setallResumes] = useState([]);
+  // for showing and hiding create resume form
+  const [showCreteResume, setShowCreteResume] = useState(false);
+  const [showUploadResume, setShowUploadResume] = useState(false);
 
   let handleRegistrationAndLogIn = async (e) => {
     e.preventDefault();
@@ -123,6 +126,22 @@ const DataContextProvider = ({ children }) => {
       );
 
       getAllResumesByUserId();
+      setShowCreteResume(false)
+    } catch (error) {
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
+
+  const deleteResume = async (resumeId) => {
+    try {
+      let res = await axios.delete(`${backendUrl}/resume/${resumeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      await getAllResumesByUserId();
     } catch (error) {
       console.log("Status:", error.response?.status);
       console.log("Data:", error.response?.data);
@@ -146,11 +165,16 @@ const DataContextProvider = ({ children }) => {
     setresumeTitle,
     allResumes,
     setallResumes,
+    showCreteResume,
+    setShowCreteResume,
+    showUploadResume,
+    setShowUploadResume,
     handleRegistrationAndLogIn,
     handleLogOut,
     createResume,
     getAllResumesByUserId,
     getUserByUserId,
+    deleteResume,
   };
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

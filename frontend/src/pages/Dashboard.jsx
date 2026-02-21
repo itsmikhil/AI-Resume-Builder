@@ -21,12 +21,11 @@ const Dashboard = () => {
     setresumeTitle,
     createResume,
     allResumes,
-    setallResumes,
-    getUserByUserId,
+    setallResumes,showCreteResume, setShowCreteResume,showUploadResume, setShowUploadResume,
+    getUserByUserId,deleteResume,
   } = useContext(DataContext);
 
-  const [showCreteResume, setShowCreteResume] = useState(false);
-  const [showUploadResume, setShowUploadResume] = useState(false);
+
   const [resume, setResume] = useState(null);
   const [editResumeId, setEditResumeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -77,18 +76,10 @@ const Dashboard = () => {
   // but this way function is called as soon as token is set
   useEffect(() => {
     if (token) {
-      getUserByUserId();
+      getUserByUserId();      
     }
   }, [token]);
 
-  const deleteResume = (resumeId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this resume",
-    );
-    if (confirmDelete) {
-      setAllResumes(allResumes.filter((resume) => resume._id !== resumeId));
-    }
-  };
 
   return (
     <div>
