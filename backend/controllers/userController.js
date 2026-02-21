@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import validator from "validator";
 import jwt from "jsonwebtoken";
 import userModel from "../models/user.js";
+import resumeModel from "../models/resume.js";
 
 const generateToken = (email, id) => {
   let token = jwt.sign({ email, id }, process.env.JWT_SECRET, {
@@ -142,4 +143,21 @@ const getUserByUserId = async (req, res) => {
   }
 };
 
-export default { handleUserRegisteration, handleUserSignIn,getUserByUserId };
+const getUserResumes = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const resumes = await resumeModel.find({ userId });
+
+    return res.status(200).json({ resumes });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+export default {
+  handleUserRegisteration,
+  handleUserSignIn,
+  getUserByUserId,
+  getUserResumes,
+};

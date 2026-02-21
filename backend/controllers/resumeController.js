@@ -139,3 +139,11 @@ let updateResume = async (req, res) => {
   }
 };
 
+
+let findAllResumesByUserId = async (req, res) => {
+  try {
+    let { id } = req.user;
+
+
+  } catch (error) {}
+};
