@@ -13,6 +13,8 @@ const DataContextProvider = ({ children }) => {
   const [userEmail, setuserEmail] = useState("");
   const [userName, setuserName] = useState("");
   const [userPassword, setuserPassword] = useState("");
+  const [resumeTitle, setresumeTitle] = useState("");
+  const [allResumes, setallResumes] = useState([]);
 
   let handleRegistrationAndLogIn = async (e) => {
     e.preventDefault();
@@ -61,8 +63,9 @@ const DataContextProvider = ({ children }) => {
     }
   };
 
-  let handleLogOut = async () => {
+  const handleLogOut = async () => {
     localStorage.removeItem("token");
+    setisLoggedIn(false);
     settoken("");
     setuserEmail("");
     setuserPassword("");
@@ -70,18 +73,84 @@ const DataContextProvider = ({ children }) => {
     navigate("/");
   };
 
+  const getUserByUserId = async (req, res) => {
+    try {
+      let res = await axios.get(`${backendUrl}/user/getUser`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setuserEmail(res.data.user.email);
+      setuserName(res.data.user.name);
+      setuserPassword(res.data.user.password);
+      setisLoggedIn(true);
+      getAllResumesByUserId();
+    } catch (error) {
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
+
+  const getAllResumesByUserId = async (req, res) => {
+    try {
+      let res = await axios.get(`${backendUrl}/user/getResumes`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setallResumes(res?.data?.resumes);
+    } catch (error) {
+      navigate("/login");
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
+
+  const createResume = async (e) => {
+    try {
+      e.preventDefault();
+      let res = await axios.post(
+        `${backendUrl}/resume/create`,
+        { title: resumeTitle },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      getAllResumesByUserId();
+    } catch (error) {
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
+
   const value = {
     navigate,
     state,
     setState,
+    token,
+    settoken,
     userEmail,
     setuserEmail,
     userName,
     setuserName,
     userPassword,
     setuserPassword,
+    resumeTitle,
+    setresumeTitle,
+    allResumes,
+    setallResumes,
     handleRegistrationAndLogIn,
     handleLogOut,
+    createResume,
+    getAllResumesByUserId,
+    getUserByUserId,
   };
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

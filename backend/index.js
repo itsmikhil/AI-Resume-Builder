@@ -1,10 +1,12 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
 import dbConnect from "./configs/db.js";
 import userRouter from "./routes/userRoute.js";
+import resumeRouter from "./routes/resumeRoute.js";
 
-dotenv.config();
 const app = express();
 
 app.use(cors());
@@ -20,6 +22,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/user", userRouter);
+app.use("/api/resume", resumeRouter);
 
 app.listen(PORT, () => {
   console.log(`server is ruuninng on ${PORT}`);

@@ -145,9 +145,9 @@ const getUserByUserId = async (req, res) => {
 
 const getUserResumes = async (req, res) => {
   try {
-    const userId = req.userId;
+    const {id} = req.user;
 
-    const resumes = await resumeModel.find({ userId });
+    const resumes = await resumeModel.find({ userId:id });
 
     return res.status(200).json({ resumes });
   } catch (error) {

@@ -23,7 +23,7 @@ const createResume = async (req, res) => {
   }
 };
 
-let deleteResume = async (req, res) => {
+const deleteResume = async (req, res) => {
   try {
     let { id } = req.user;
     let { resumeId } = req.params;
@@ -54,7 +54,7 @@ let deleteResume = async (req, res) => {
   }
 };
 
-let updateResumeTitle = async (req, res) => {
+const updateResumeTitle = async (req, res) => {
   try {
     let { id } = req.user;
     let { resumeId } = req.params;
@@ -88,7 +88,7 @@ let updateResumeTitle = async (req, res) => {
   }
 };
 
-let updateResume = async (req, res) => {
+const updateResume = async (req, res) => {
   try {
     let { id } = req.user;
     let { resumeData, resumeId, removeBackground } = req.body;
@@ -139,11 +139,4 @@ let updateResume = async (req, res) => {
   }
 };
 
-
-let findAllResumesByUserId = async (req, res) => {
-  try {
-    let { id } = req.user;
-
-
-  } catch (error) {}
-};
+export default { createResume, deleteResume, updateResume, updateResumeTitle };

@@ -12,30 +12,26 @@ import { useContext, useEffect, useState } from "react";
 import { DataContext } from "../../context/DataContext";
 
 const Dashboard = () => {
-  let { userName, token, navigate, } = useContext(DataContext);
-  console.log(userName);
+  let {
+    userName,
+    token,
+    settoken,
+    navigate,
+    resumeTitle,
+    setresumeTitle,
+    createResume,
+    allResumes,
+    setallResumes,
+    getUserByUserId,
+  } = useContext(DataContext);
 
-  const [allResumes, setAllResumes] = useState([]);
   const [showCreteResume, setShowCreteResume] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
-  const [title, setTitle] = useState("");
   const [resume, setResume] = useState(null);
   const [editResumeId, setEditResumeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"];
-
-  const createResume = (e) => {
-    e.preventDefault();
-    const newResume = {
-      _id: Date.now().toString(),
-      title,
-      updatedAt: new Date(),
-    };
-    setAllResumes([...allResumes, newResume]);
-    setTitle("");
-    setShowCreteResume(false);
-  };
 
   const uploadResume = (e) => {
     e.preventDefault();
@@ -47,7 +43,7 @@ const Dashboard = () => {
         title,
         updatedAt: new Date(),
       };
-      setAllResumes([...allResumes, newResume]);
+      setallResumes([...allResumes, newResume]);
       setTitle("");
       setResume(null);
       setShowUploadResume(false);
@@ -71,8 +67,19 @@ const Dashboard = () => {
 
     if (!storedToken) {
       navigate("/login");
+    } else {
+      settoken(storedToken);
     }
   }, []);
+
+  // a seperate use effect becuase if i was calling function immediately after setting then it was
+  // showing to login again
+  // but this way function is called as soon as token is set
+  useEffect(() => {
+    if (token) {
+      getUserByUserId();
+    }
+  }, [token]);
 
   const deleteResume = (resumeId) => {
     const confirmDelete = window.confirm(
@@ -111,56 +118,57 @@ const Dashboard = () => {
         <hr className="border-slate-300 my-6 sm:w-[305px]" />
 
         <div className="grid grid-cols-2 sm:flex flex-wrap gap-4">
-          {allResumes.map((resume, index) => {
-            const baseColor = colors[index % colors.length];
+          {allResumes &&
+            allResumes.map((resume, index) => {
+              const baseColor = colors[index % colors.length];
 
-            return (
-              <div
-                key={resume._id}
-                className="relative w-full sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 border group hover:shadow-lg transition-all duration-300 cursor-pointer"
-                style={{
-                  background: `linear-gradient(135deg, ${baseColor}10, ${baseColor}40)`,
-                  borderColor: baseColor + "40",
-                }}
-              >
-                <FilePenLineIcon
-                  className="size-11 group-hover:scale-105 transition-all px-2 text-center"
-                  style={{ color: baseColor }}
-                />
-
-                <p
-                  className="text-sm group-hover:scale-105 transition-all px-2 text-center"
-                  style={{ color: baseColor }}
-                >
-                  {resume.title}
-                </p>
-
-                <p
-                  className="absolute bottom-1 text-[11px] px-2 text-center"
-                  style={{ color: baseColor + "90" }}
-                >
-                  Updated on {new Date(resume.updatedAt).toLocaleDateString()}
-                </p>
-
+              return (
                 <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="absolute top-1 right-1 group-hover:flex items-center hidden"
+                  key={resume._id}
+                  className="relative w-full sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 border group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                  style={{
+                    background: `linear-gradient(135deg, ${baseColor}10, ${baseColor}40)`,
+                    borderColor: baseColor + "40",
+                  }}
                 >
-                  <TrashIcon
-                    onClick={() => deleteResume(resume._id)}
-                    className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors"
+                  <FilePenLineIcon
+                    className="size-11 group-hover:scale-105 transition-all px-2 text-center"
+                    style={{ color: baseColor }}
                   />
-                  <PencilIcon
-                    onClick={() => {
-                      setEditResumeId(resume._id);
-                      setTitle(resume.title);
-                    }}
-                    className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors"
-                  />
+
+                  <p
+                    className="text-sm group-hover:scale-105 transition-all px-2 text-center"
+                    style={{ color: baseColor }}
+                  >
+                    {resume.title}
+                  </p>
+
+                  <p
+                    className="absolute bottom-1 text-[11px] px-2 text-center"
+                    style={{ color: baseColor + "90" }}
+                  >
+                    Updated on {new Date(resume.updatedAt).toLocaleDateString()}
+                  </p>
+
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute top-1 right-1 group-hover:flex items-center hidden"
+                  >
+                    <TrashIcon
+                      onClick={() => deleteResume(resume._id)}
+                      className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors"
+                    />
+                    <PencilIcon
+                      onClick={() => {
+                        setEditResumeId(resume._id);
+                        setTitle(resume.title);
+                      }}
+                      className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors"
+                    />
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
 
         {/* Create Modal */}
@@ -176,14 +184,17 @@ const Dashboard = () => {
             >
               <h2 className="text-xl font-bold mb-4">Create a Resume</h2>
               <input
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
+                onChange={(e) => setresumeTitle(e.target.value)}
+                value={resumeTitle}
                 type="text"
                 placeholder="Enter resume title"
                 className="w-full py-2 mb-4 px-4 focus:border-green-600 ring-green-600"
                 required
               />
-              <button className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+              <button
+                onClick={() => createResume}
+                className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+              >
                 Create Resume
               </button>
               <XIcon
