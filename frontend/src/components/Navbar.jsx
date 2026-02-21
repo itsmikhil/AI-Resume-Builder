@@ -1,19 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import logo from "../assets/logo.svg"; // adjust path if needed
+import { DataContext } from "../../context/DataContext";
 
 const Navbar = () => {
-  const navigate = useNavigate();
 
-  // 🔥 Simulated user (frontend only)
-  const [user, setUser] = useState({
-    name: "John Doe",
-  });
+  let {userName,token,navigate,handleLogOut}=useContext(DataContext);
 
   const logoutUser = () => {
     setUser(null);
     navigate("/");
   };
+  
 
   return (
     <div className="shadow bg-white">
@@ -23,11 +21,11 @@ const Navbar = () => {
         </Link>
 
         <div className="flex items-center gap-4 text-sm">
-          {user && <p className="max-sm:hidden">Hi, {user.name}</p>}
+          {userName && <p className="max-sm:hidden">Hi, {userName}</p>}
 
-          {user && (
+          {userName && (
             <button
-              onClick={logoutUser}
+              onClick={handleLogOut}
               className="bg-white hover:bg-slate-50 border border-gray-300 px-7 py-1.5 rounded-full active:scale-95 transition-all"
             >
               Logout

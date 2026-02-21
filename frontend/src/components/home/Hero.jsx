@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { FaInstagram } from "react-icons/fa";
 import { FiFramer } from "react-icons/fi";
 import { FaMicrosoft } from "react-icons/fa";
 import { SiHuawei } from "react-icons/si";
 import { TbBrandWalmart } from "react-icons/tb";
 import logo from "../../assets/logo.svg";
+import { DataContext } from "../../../context/DataContext";
 
 const Hero = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const logos = [FaInstagram, FiFramer, FaMicrosoft, SiHuawei, TbBrandWalmart];
-
+  const { navigate } = useContext(DataContext);
   return (
     <>
       <div className="min-h-screen pb-20">
@@ -37,7 +38,7 @@ const Hero = () => {
             <button className="px-6 py-2 bg-green-500 hover:bg-green-700 rounded-full text-white">
               Get started
             </button>
-            <button className="px-6 py-2 border rounded-full text-slate-700 hover:bg-slate-50">
+            <button className="px-6 py-2 border rounded-full text-slate-700 hover:bg-slate-50" onClick={()=> navigate("/login")}>
               Login
             </button>
           </div>
@@ -125,9 +126,7 @@ const Hero = () => {
             </button>
           </div>
 
-          <p className="py-6 text-slate-600 mt-14">
-            Trusted by leading brands
-          </p>
+          <p className="py-6 text-slate-600 mt-14">Trusted by leading brands</p>
 
           <div className="flex flex-wrap justify-center gap-36 max-w-3xl">
             {logos.map((Logo, index) => (

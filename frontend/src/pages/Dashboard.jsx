@@ -8,9 +8,13 @@ import {
   UploadCloudIcon,
   XIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { DataContext } from "../../context/DataContext";
 
 const Dashboard = () => {
+  let { userName, token, navigate, } = useContext(DataContext);
+  console.log(userName);
+
   const [allResumes, setAllResumes] = useState([]);
   const [showCreteResume, setShowCreteResume] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
@@ -21,7 +25,6 @@ const Dashboard = () => {
 
   const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"];
 
-  // Create Resume (Frontend Only)
   const createResume = (e) => {
     e.preventDefault();
     const newResume = {
@@ -34,7 +37,6 @@ const Dashboard = () => {
     setShowCreteResume(false);
   };
 
-  // Upload Resume (Frontend Simulation)
   const uploadResume = (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -53,22 +55,28 @@ const Dashboard = () => {
     }, 1000);
   };
 
-  // Edit Resume Title
   const editTitle = (e) => {
     e.preventDefault();
     setAllResumes(
       allResumes.map((resume) =>
-        resume._id === editResumeId ? { ...resume, title } : resume
-      )
+        resume._id === editResumeId ? { ...resume, title } : resume,
+      ),
     );
     setTitle("");
     setEditResumeId("");
   };
 
-  // Delete Resume
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+
+    if (!storedToken) {
+      navigate("/login");
+    }
+  }, []);
+
   const deleteResume = (resumeId) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this resume"
+      "Are you sure you want to delete this resume",
     );
     if (confirmDelete) {
       setAllResumes(allResumes.filter((resume) => resume._id !== resumeId));
@@ -78,10 +86,6 @@ const Dashboard = () => {
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <p className="text-2xl font-medium mb-6 bg-linear-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent sm:hidden">
-          Welcome, John Doe
-        </p>
-
         <div className="flex gap-4">
           <button
             onClick={() => setShowCreteResume(true)}
@@ -135,8 +139,7 @@ const Dashboard = () => {
                   className="absolute bottom-1 text-[11px] px-2 text-center"
                   style={{ color: baseColor + "90" }}
                 >
-                  Updated on{" "}
-                  {new Date(resume.updatedAt).toLocaleDateString()}
+                  Updated on {new Date(resume.updatedAt).toLocaleDateString()}
                 </p>
 
                 <div

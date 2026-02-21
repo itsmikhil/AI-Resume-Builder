@@ -1,40 +1,30 @@
 import { Lock, Mail, User2Icon } from "lucide-react";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { DataContext } from "../../context/DataContext";
 
 const Login = () => {
-  const [state, setState] = useState("login");
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
-  };
+  let {
+    state,
+    setState,
+    userEmail,
+    setuserEmail,
+    userName,
+    setuserName,
+    userPassword,
+    setuserPassword,
+    handleRegistrationAndLogIn,
+  } = useContext(DataContext);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <form
-        onSubmit={handleSubmit}
+        onSubmit={(e)=>handleRegistrationAndLogIn(e)}
         className="sm:w-[350px] w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white shadow-md"
       >
         <h1 className="text-gray-900 text-3xl mt-10 font-medium">
           {state === "login" ? "Login" : "Sign up"}
         </h1>
-        <p className="text-gray-500 text-sm mt-2">
-          Please {state} to continue
-        </p>
+        <p className="text-gray-500 text-sm mt-2">Please {state} to continue</p>
 
         {state !== "login" && (
           <div className="flex items-center mt-6 w-full bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
@@ -44,8 +34,9 @@ const Login = () => {
               name="name"
               placeholder="Name"
               className="border-none outline-none ring-0 w-full"
-              value={formData.name}
-              onChange={handleChange}
+              value={userName}
+              onChange={(e) => setuserName(e.target.value)
+              }
               required
             />
           </div>
@@ -58,8 +49,8 @@ const Login = () => {
             name="email"
             placeholder="Email id"
             className="border-none outline-none ring-0 w-full"
-            value={formData.email}
-            onChange={handleChange}
+            value={userEmail}
+            onChange={(e) => setuserEmail(e.target.value)}
             required
           />
         </div>
@@ -71,8 +62,8 @@ const Login = () => {
             name="password"
             placeholder="Password"
             className="border-none outline-none ring-0 w-full"
-            value={formData.password}
-            onChange={handleChange}
+            value={userPassword}
+            onChange={(e) => setuserPassword(e.target.value)}
             required
           />
         </div>
@@ -93,9 +84,7 @@ const Login = () => {
           {state === "login"
             ? "Don't have an account?"
             : "Already have an account?"}{" "}
-          <span className="text-green-500 hover:underline">
-            click here
-          </span>
+          <span className="text-green-500 hover:underline">click here</span>
         </p>
       </form>
     </div>
