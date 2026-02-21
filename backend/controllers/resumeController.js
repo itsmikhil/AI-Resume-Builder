@@ -57,8 +57,7 @@ const deleteResume = async (req, res) => {
 const updateResumeTitle = async (req, res) => {
   try {
     let { id } = req.user;
-    let { resumeId } = req.params;
-    let { title } = req.body;
+    let { title,resumeId } = req.body;
 
     title = title?.trim() || "Untitled Resume";
 

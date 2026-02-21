@@ -21,45 +21,24 @@ const Dashboard = () => {
     setresumeTitle,
     createResume,
     allResumes,
-    setallResumes,showCreteResume, setShowCreteResume,showUploadResume, setShowUploadResume,
-    getUserByUserId,deleteResume,
+    setallResumes,
+    showCreteResume,
+    setShowCreteResume,
+    showUploadResume,
+    setShowUploadResume,
+    titleOfResumeToBeEdited,
+    settitleOfResumeToBeEdited,
+    idOfResumeToBeEdited,
+    setidOfResumeToBeEdited,showEditResumeTitle, setshowEditResumeTitle,
+    getUserByUserId,
+    deleteResume,
+    editResumeTitle,
   } = useContext(DataContext);
 
-
-  const [resume, setResume] = useState(null);
-  const [editResumeId, setEditResumeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"];
 
-  const uploadResume = (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const newResume = {
-        _id: Date.now().toString(),
-        title,
-        updatedAt: new Date(),
-      };
-      setallResumes([...allResumes, newResume]);
-      setTitle("");
-      setResume(null);
-      setShowUploadResume(false);
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  const editTitle = (e) => {
-    e.preventDefault();
-    setAllResumes(
-      allResumes.map((resume) =>
-        resume._id === editResumeId ? { ...resume, title } : resume,
-      ),
-    );
-    setTitle("");
-    setEditResumeId("");
-  };
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -76,10 +55,9 @@ const Dashboard = () => {
   // but this way function is called as soon as token is set
   useEffect(() => {
     if (token) {
-      getUserByUserId();      
+      getUserByUserId();
     }
   }, [token]);
-
 
   return (
     <div>
@@ -151,8 +129,9 @@ const Dashboard = () => {
                     />
                     <PencilIcon
                       onClick={() => {
-                        setEditResumeId(resume._id);
-                        setTitle(resume.title);
+                        setshowEditResumeTitle(true);
+                        setidOfResumeToBeEdited(resume._id);
+                        settitleOfResumeToBeEdited(resume.title);
                       }}
                       className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors"
                     />
@@ -197,10 +176,9 @@ const Dashboard = () => {
         )}
 
         {/* Edit Modal */}
-        {editResumeId && (
+        {showEditResumeTitle && (
           <form
-            onSubmit={editTitle}
-            onClick={() => setEditResumeId("")}
+            onSubmit={(e)=>editResumeTitle(e,idOfResumeToBeEdited,titleOfResumeToBeEdited)}
             className="fixed inset-0 bg-black/70 backdrop-blur z-10 flex items-center justify-center"
           >
             <div
@@ -209,8 +187,8 @@ const Dashboard = () => {
             >
               <h2 className="text-xl font-bold mb-4">Edit Resume Title</h2>
               <input
-                onChange={(e) => setTitle(e.target.value)}
-                value={title}
+                onChange={(e) => settitleOfResumeToBeEdited(e.target.value)}
+                value={titleOfResumeToBeEdited}
                 type="text"
                 placeholder="Enter resume title"
                 className="w-full py-2 mb-4 px-4 focus:border-green-600 ring-green-600"
@@ -219,9 +197,8 @@ const Dashboard = () => {
               <button className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
                 Update
               </button>
-              <XIcon
+              <XIcon onClick={()=>setshowEditResumeTitle(false)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors"
-                onClick={() => setEditResumeId("")}
               />
             </div>
           </form>

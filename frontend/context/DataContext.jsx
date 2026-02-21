@@ -17,7 +17,10 @@ const DataContextProvider = ({ children }) => {
   const [allResumes, setallResumes] = useState([]);
   // for showing and hiding create resume form
   const [showCreteResume, setShowCreteResume] = useState(false);
+  const [showEditResumeTitle, setshowEditResumeTitle] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
+  const [titleOfResumeToBeEdited, settitleOfResumeToBeEdited] = useState("");
+  const [idOfResumeToBeEdited, setidOfResumeToBeEdited] = useState("");
 
   let handleRegistrationAndLogIn = async (e) => {
     e.preventDefault();
@@ -126,7 +129,7 @@ const DataContextProvider = ({ children }) => {
       );
 
       getAllResumesByUserId();
-      setShowCreteResume(false)
+      setShowCreteResume(false);
     } catch (error) {
       console.log("Status:", error.response?.status);
       console.log("Data:", error.response?.data);
@@ -149,6 +152,28 @@ const DataContextProvider = ({ children }) => {
     }
   };
 
+  const editResumeTitle = async (e, resumeId, newTitle) => {
+    try {
+      e.preventDefault();
+      console.log(resumeId);
+
+      let res = await axios.put(
+        `${backendUrl}/resume/update-title`,
+        { resumeId, title: newTitle },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      await getAllResumesByUserId();
+      setshowEditResumeTitle(false);
+    } catch (error) {
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
   const value = {
     navigate,
     state,
@@ -169,12 +194,19 @@ const DataContextProvider = ({ children }) => {
     setShowCreteResume,
     showUploadResume,
     setShowUploadResume,
+    titleOfResumeToBeEdited,
+    settitleOfResumeToBeEdited,
+    idOfResumeToBeEdited,
+    setidOfResumeToBeEdited,
+    showEditResumeTitle,
+    setshowEditResumeTitle,
     handleRegistrationAndLogIn,
     handleLogOut,
     createResume,
     getAllResumesByUserId,
     getUserByUserId,
     deleteResume,
+    editResumeTitle,
   };
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
