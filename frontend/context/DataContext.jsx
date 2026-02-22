@@ -2,6 +2,24 @@ import React, { useState } from "react";
 import { createContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+import {
+  ArrowLeftIcon,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  DownloadIcon,
+  EyeIcon,
+  EyeOff,
+  FileText,
+  FolderIcon,
+  GraduationCap,
+  Share2Icon,
+  Sparkles,
+  User,
+  Award,
+} from "lucide-react";
+
 export const DataContext = createContext();
 
 const DataContextProvider = ({ children }) => {
@@ -21,6 +39,36 @@ const DataContextProvider = ({ children }) => {
   const [showUploadResume, setShowUploadResume] = useState(false);
   const [titleOfResumeToBeEdited, settitleOfResumeToBeEdited] = useState("");
   const [idOfResumeToBeEdited, setidOfResumeToBeEdited] = useState("");
+  // below states are used in resumeBuilder
+  const [resumeData, setresumeData] = useState({
+    _id: "",
+    title: "Untitled Resume",
+    personal_info: {},
+    professional_summary: "",
+    experience: [],
+    education: [],
+    project: [],
+    skills: [],
+    certification: [],
+    template: "classic",
+    accent_color: "#3b82f6",
+    public: false,
+  });
+  const [activeSectionIndex, setactiveSectionIndex] = useState(0);
+  const [removeBackground, setRemoveBackground] = useState(false);
+
+  const sections = [
+    { id: "personal", name: "personal Info", icon: User },
+    { id: "summary", name: "Summary", icon: FileText },
+    { id: "experience", name: "Experience", icon: Briefcase },
+    { id: "education", name: "Education", icon: GraduationCap },
+    { id: "projects", name: "Projects", icon: FolderIcon },
+    { id: "skills", name: "Skills", icon: Sparkles },
+    { id: "certification", name: "Certification", icon: Award },
+  ];
+
+  const activeSection = sections[activeSectionIndex];
+  const [idOfResumeToBeUpdated, setidOfResumeToBeUpdated] = useState();
 
   let handleRegistrationAndLogIn = async (e) => {
     e.preventDefault();
@@ -79,7 +127,7 @@ const DataContextProvider = ({ children }) => {
     navigate("/");
   };
 
-  const getUserByUserId = async (req, res) => {
+  const getUserByUserId = async () => {
     try {
       let res = await axios.get(`${backendUrl}/user/getUser`, {
         headers: {
@@ -92,6 +140,7 @@ const DataContextProvider = ({ children }) => {
       setisLoggedIn(true);
       getAllResumesByUserId();
     } catch (error) {
+      navigate("/login");
       console.log("Status:", error.response?.status);
       console.log("Data:", error.response?.data);
       console.log("Message:", error.message);
@@ -155,7 +204,6 @@ const DataContextProvider = ({ children }) => {
   const editResumeTitle = async (e, resumeId, newTitle) => {
     try {
       e.preventDefault();
-      console.log(resumeId);
 
       let res = await axios.put(
         `${backendUrl}/resume/update-title`,
@@ -174,6 +222,48 @@ const DataContextProvider = ({ children }) => {
       console.log("Message:", error.message);
     }
   };
+
+  const getResumeByResumeId = async (resumeId) => {
+    try {
+      console.log(token);
+
+      let res = await axios.get(`${backendUrl}/resume/${resumeId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setresumeData(res.data.result);
+      navigate(`/app/builder/${resumeId}`);
+      setidOfResumeToBeEdited(resumeId);
+    } catch (error) {
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
+
+  const updateResume = async () => {
+    try {
+      console.log(token);
+
+      let res = await axios.put(
+        `${backendUrl}/resume/update`,
+        { resumeData, resumeId: idOfResumeToBeEdited, removeBackground },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      console.log(res.data);
+      setresumeData(res.data.resume);
+    } catch (error) {
+      console.log("Status:", error.response?.status);
+      console.log("Data:", error.response?.data);
+      console.log("Message:", error.message);
+    }
+  };
+
   const value = {
     navigate,
     state,
@@ -200,6 +290,16 @@ const DataContextProvider = ({ children }) => {
     setidOfResumeToBeEdited,
     showEditResumeTitle,
     setshowEditResumeTitle,
+    resumeData,
+    setresumeData,
+    activeSectionIndex,
+    setactiveSectionIndex,
+    removeBackground,
+    setRemoveBackground,
+    sections,
+    activeSection,
+    idOfResumeToBeUpdated,
+    setidOfResumeToBeUpdated,
     handleRegistrationAndLogIn,
     handleLogOut,
     createResume,
@@ -207,6 +307,8 @@ const DataContextProvider = ({ children }) => {
     getUserByUserId,
     deleteResume,
     editResumeTitle,
+    updateResume,
+    getResumeByResumeId,
   };
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

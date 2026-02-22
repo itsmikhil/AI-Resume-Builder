@@ -6,7 +6,8 @@ const resumeRouter = express.Router();
 
 resumeRouter.post("/create",userAuth, resumeController.createResume);
 resumeRouter.delete("/:resumeId",userAuth, resumeController.deleteResume);
-resumeRouter.get("/update",userAuth, resumeController.updateResume);
+resumeRouter.put("/update",userAuth, resumeController.updateResume);
 resumeRouter.put("/update-title",userAuth, resumeController.updateResumeTitle);
+resumeRouter.get("/:resumeId",userAuth, resumeController.getResumeByResumeId);
 
 export default resumeRouter;

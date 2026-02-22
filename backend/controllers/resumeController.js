@@ -57,7 +57,7 @@ const deleteResume = async (req, res) => {
 const updateResumeTitle = async (req, res) => {
   try {
     let { id } = req.user;
-    let { title,resumeId } = req.body;
+    let { title, resumeId } = req.body;
 
     title = title?.trim() || "Untitled Resume";
 
@@ -89,6 +89,8 @@ const updateResumeTitle = async (req, res) => {
 
 const updateResume = async (req, res) => {
   try {
+    console.log("hello");
+    
     let { id } = req.user;
     let { resumeData, resumeId, removeBackground } = req.body;
     let image = req.file;
@@ -122,14 +124,14 @@ const updateResume = async (req, res) => {
     }
 
     let result = await resumeModel.findOneAndUpdate(
-      { userId: id, resumeId },
+      { userId: id, _id:resumeId },
       resumeDataCopy,
       { new: true },
     );
 
     return res
       .status(200)
-      .json({ success: true, message: "Saved successfully", result });
+      .json({ success: true, message: "Saved successfully", resume:result });
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -138,4 +140,26 @@ const updateResume = async (req, res) => {
   }
 };
 
-export default { createResume, deleteResume, updateResume, updateResumeTitle };
+const getResumeByResumeId = async (req, res) => {
+  try {
+    let { id } = req.user;
+    let { resumeId } = req.params;
+    let result = await resumeModel.findOne({ userId: id, _id: resumeId });
+    return res
+      .status(200)
+      .json({ success: true, message: "Resume Found", result });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export default {
+  createResume,
+  deleteResume,
+  updateResume,
+  updateResumeTitle,
+  getResumeByResumeId,
+};

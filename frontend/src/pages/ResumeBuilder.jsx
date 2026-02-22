@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeftIcon,
@@ -27,40 +27,26 @@ import EducationForm from "../components/EducationForm";
 import ProjectForm from "../components/ProjectForm";
 import SkillsForm from "../components/SkillsForm";
 import CertificationForm from "../components/CertificationForm";
+import { DataContext } from "../../context/DataContext";
 
 const ResumeBuilder = () => {
-  const [resumeData, setResumeData] = useState({
-    _id: Date.now().toString(),
-    title: "Untitled Resume",
-    personal_info: {},
-    professional_summary: "",
-    experience: [],
-    education: [],
-    project: [],
-    skills: [],
-    certification: [],
-    template: "classic",
-    accent_color: "#3b82f6",
-    public: false,
-  });
-
-  const [activeSectionIndex, setactiveSectionIndex] = useState(0);
-  const [removeBackground, setRemoveBackground] = useState(false);
-
-  const sections = [
-    { id: "personal", name: "personal Info", icon: User },
-    { id: "summary", name: "Summary", icon: FileText },
-    { id: "experience", name: "Experience", icon: Briefcase },
-    { id: "education", name: "Education", icon: GraduationCap },
-    { id: "projects", name: "Projects", icon: FolderIcon },
-    { id: "skills", name: "Skills", icon: Sparkles },
-    { id: "certification", name: "Certification", icon: Award },
-  ];
-
-  const activeSection = sections[activeSectionIndex];
+  let {
+    token,
+    settoken,
+    navigate,
+    resumeData,
+    setresumeData,
+    activeSectionIndex,
+    setactiveSectionIndex,
+    removeBackground,
+    setRemoveBackground,
+    sections,
+    activeSection,
+    updateResume,getUserByUserId,
+  } = useContext(DataContext);
 
   const changeResumeVisibility = () => {
-    setResumeData((prev) => ({
+    setresumeData((prev) => ({
       ...prev,
       public: !prev.public,
     }));
@@ -76,19 +62,36 @@ const ResumeBuilder = () => {
       alert("Share not supported on this browser.");
     }
   };
+  useEffect(() => {
+    console.log(resumeData);
+  }, [resumeData]);
 
   const downloadResume = () => {
     window.print();
   };
 
-  const saveResume = () => {
-    console.log("Saved Resume Data:", resumeData);
-    alert("Changes saved locally (frontend only)");
-  };
-
   useEffect(() => {
     document.title = resumeData.title;
   }, [resumeData.title]);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+
+    if (!storedToken) {
+      navigate("/login");
+    } else {
+      settoken(storedToken);
+    }
+  }, []);
+
+  // a seperate use effect becuase if i was calling function immediately after setting then it was
+  // showing to login again
+  // but this way function is called as soon as token is set
+  useEffect(() => {
+    if (token) {
+      getUserByUserId();
+    }
+  }, [token]);
 
   return (
     <div>
@@ -103,14 +106,11 @@ const ResumeBuilder = () => {
 
       <div className="max-w-7xl mx-auto px-4 pb-8">
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* Left Panel */}
-          {/* 🔥 overflow-hidden REMOVED here */}
           <div className="relative lg:col-span-5 rounded-lg">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 pt-1">
-              {/* Progress Bar */}
               <hr className="absolute top-0 left-0 right-0 border-2 border-gray-200" />
               <hr
-                className="absolute top-0 left-0 h-1 bg-linear-to-br from-green-500 to-green-600 border-none transition-all duration-500"
+                className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-500"
                 style={{
                   width: `${
                     (activeSectionIndex * 100) / (sections.length - 1)
@@ -118,20 +118,19 @@ const ResumeBuilder = () => {
                 }}
               />
 
-              {/* Section Navigation */}
-              <div className="flex flex-wrap justify-between items-center mb-6 border-b border-gray-300 py-1 gap-2">
-                <div className="flex justify-between items-center mb-6 border-b border-gray-300 py-1">
-                  <div className="flex items-center gap-2 relative"></div>
+              <div className="flex items-center justify-between mb-6 border-b border-gray-300 pb-3 mt-6">
+                <div className="flex items-center gap-3">
                   <TemplateSelector
                     selectedTemplate={resumeData.template}
                     onChange={(template) =>
-                      setResumeData((prev) => ({ ...prev, template }))
+                      setresumeData((prev) => ({ ...prev, template }))
                     }
                   />
+
                   <ColorPicker
                     selectedColor={resumeData.accent_color}
                     onChange={(color) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         accent_color: color,
                       }))
@@ -139,15 +138,16 @@ const ResumeBuilder = () => {
                   />
                 </div>
 
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                   {activeSectionIndex !== 0 && (
                     <button
                       onClick={() =>
                         setactiveSectionIndex((prev) => Math.max(prev - 1, 0))
                       }
-                      className="flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+                      className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
                     >
-                      <ChevronLeft className="size-4" /> Previous
+                      <ChevronLeft className="size-4" />
+                      Previous
                     </button>
                   )}
 
@@ -157,7 +157,7 @@ const ResumeBuilder = () => {
                         Math.min(prev + 1, sections.length - 1),
                       )
                     }
-                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
+                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition ${
                       activeSectionIndex === sections.length - 1 && "opacity-50"
                     }`}
                     disabled={activeSectionIndex === sections.length - 1}
@@ -168,13 +168,12 @@ const ResumeBuilder = () => {
                 </div>
               </div>
 
-              {/* Form Sections */}
               <div className="space-y-6">
                 {activeSection.id === "personal" && (
                   <PersonalInfoForm
                     data={resumeData.personal_info}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         personal_info: data,
                       }))
@@ -188,7 +187,7 @@ const ResumeBuilder = () => {
                   <ProfessionalSummaryForm
                     data={resumeData.professional_summary}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         professional_summary: data,
                       }))
@@ -200,7 +199,7 @@ const ResumeBuilder = () => {
                   <ExperienceForm
                     data={resumeData.experience}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         experience: data,
                       }))
@@ -212,7 +211,7 @@ const ResumeBuilder = () => {
                   <EducationForm
                     data={resumeData.education}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         education: data,
                       }))
@@ -224,7 +223,7 @@ const ResumeBuilder = () => {
                   <ProjectForm
                     data={resumeData.project}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         project: data,
                       }))
@@ -236,7 +235,7 @@ const ResumeBuilder = () => {
                   <SkillsForm
                     data={resumeData.skills}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         skills: data,
                       }))
@@ -248,7 +247,7 @@ const ResumeBuilder = () => {
                   <CertificationForm
                     data={resumeData.certification}
                     onChange={(data) =>
-                      setResumeData((prev) => ({
+                      setresumeData((prev) => ({
                         ...prev,
                         certification: data,
                       }))
@@ -258,22 +257,21 @@ const ResumeBuilder = () => {
               </div>
 
               <button
-                onClick={saveResume}
-                className="bg-linear-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm"
+                onClick={updateResume}
+                className="bg-gradient-to-r from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition rounded-md px-6 py-2 mt-6 text-sm"
               >
                 Save Changes
               </button>
             </div>
           </div>
 
-          {/* Right Panel */}
           <div className="lg:col-span-7 max-lg:mt-6">
             <div className="relative w-full">
               <div className="absolute bottom-3 left-0 right-0 flex items-center justify-end gap-2">
                 {resumeData.public && (
                   <button
                     onClick={handleShare}
-                    className="flex items-center p-2 px-4 gap-2 text-xs bg-linear-to-br from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors"
+                    className="flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-r from-blue-100 to-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors"
                   >
                     <Share2Icon className="size-4" /> Share
                   </button>
@@ -281,7 +279,7 @@ const ResumeBuilder = () => {
 
                 <button
                   onClick={changeResumeVisibility}
-                  className="flex items-center p-2 px-4 gap-2 text-xs bg-linear-to-br from-purple-100 to-purple-200 text-purple-600 ring-purple-300 rounded-lg hover:ring transition-colors"
+                  className="flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-r from-purple-100 to-purple-200 text-purple-600 ring-purple-300 rounded-lg hover:ring transition-colors"
                 >
                   {resumeData.public ? (
                     <EyeIcon className="size-4" />
@@ -293,7 +291,7 @@ const ResumeBuilder = () => {
 
                 <button
                   onClick={downloadResume}
-                  className="flex items-center p-2 px-6 gap-2 text-xs bg-linear-to-br from-green-100 to-green-200 text-green-600 ring-green-300 rounded-lg hover:ring transition-colors"
+                  className="flex items-center p-2 px-6 gap-2 text-xs bg-gradient-to-r from-green-100 to-green-200 text-green-600 ring-green-300 rounded-lg hover:ring transition-colors"
                 >
                   <DownloadIcon className="size-4" /> Download
                 </button>

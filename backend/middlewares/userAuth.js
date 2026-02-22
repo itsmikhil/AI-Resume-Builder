@@ -18,7 +18,7 @@ const userAuth = (req, res, next) => {
     next();
   } catch (err) {
     console.log(err.message);
-    return res.json({ success: false, message: "Please Login" });
+    return res.status(401).json({ success: false, message: "Please Login" });
   }
 };
 

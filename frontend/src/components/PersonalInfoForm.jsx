@@ -124,5 +124,4 @@ const PersonalInfoForm = ({
     </div>
   );
 };
-// github.split("https://www.")[1]
 export default PersonalInfoForm;

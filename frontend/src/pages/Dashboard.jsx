@@ -32,7 +32,7 @@ const Dashboard = () => {
     setidOfResumeToBeEdited,showEditResumeTitle, setshowEditResumeTitle,
     getUserByUserId,
     deleteResume,
-    editResumeTitle,
+    editResumeTitle,getResumeByResumeId
   } = useContext(DataContext);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -93,6 +93,7 @@ const Dashboard = () => {
 
               return (
                 <div
+                onClick={()=>getResumeByResumeId(resume._id)}
                   key={resume._id}
                   className="relative w-full sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 border group hover:shadow-lg transition-all duration-300 cursor-pointer"
                   style={{
