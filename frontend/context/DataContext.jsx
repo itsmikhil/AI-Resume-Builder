@@ -245,6 +245,7 @@ const DataContextProvider = ({ children }) => {
   const updateResume = async () => {
     try {
       console.log(token);
+      console.log(removeBackground);
 
       let res = await axios.put(
         `${backendUrl}/resume/update`,

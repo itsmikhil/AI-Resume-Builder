@@ -89,10 +89,10 @@ const updateResumeTitle = async (req, res) => {
 
 const updateResume = async (req, res) => {
   try {
-    console.log("hello");
-    
+
     let { id } = req.user;
     let { resumeData, resumeId, removeBackground } = req.body;
+    console.log("FILE:", req.file);
     let image = req.file;
     let resumeDataCopy;
 
@@ -123,15 +123,22 @@ const updateResume = async (req, res) => {
       resumeDataCopy.personal_info.image = response.url;
     }
 
+    if (
+      resumeDataCopy.personal_info.image &&
+      typeof resumeDataCopy.personal_info.image !== "string"
+    ) {
+      resumeDataCopy.personal_info.image = "";
+    }
+
     let result = await resumeModel.findOneAndUpdate(
-      { userId: id, _id:resumeId },
+      { userId: id, _id: resumeId },
       resumeDataCopy,
       { new: true },
     );
 
     return res
       .status(200)
-      .json({ success: true, message: "Saved successfully", resume:result });
+      .json({ success: true, message: "Saved successfully", resume: result });
   } catch (error) {
     return res.status(400).json({
       success: false,

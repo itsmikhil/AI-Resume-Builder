@@ -40,9 +40,12 @@ const ResumeBuilder = () => {
     setactiveSectionIndex,
     removeBackground,
     setRemoveBackground,
+    savedResume,
+    setsavedResume,
     sections,
     activeSection,
-    updateResume,getUserByUserId,
+    updateResume,
+    getUserByUserId,
   } = useContext(DataContext);
 
   const changeResumeVisibility = () => {
@@ -97,7 +100,10 @@ const ResumeBuilder = () => {
     <div>
       <div className="max-w-7xl mx-auto px-4 py-6">
         <Link
-          to="/"
+          to="/app"
+          onClick={async () => {
+            await updateResume();
+          }}
           className="inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all"
         >
           <ArrowLeftIcon className="size-4" /> Back to Dashboard
@@ -152,17 +158,18 @@ const ResumeBuilder = () => {
                   )}
 
                   <button
-                    onClick={() =>
+                    onClick={async () => {
+                      await updateResume();
                       setactiveSectionIndex((prev) =>
                         Math.min(prev + 1, sections.length - 1),
-                      )
-                    }
-                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition ${
-                      activeSectionIndex === sections.length - 1 && "opacity-50"
+                      );
+                    }}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition 
                     }`}
-                    disabled={activeSectionIndex === sections.length - 1}
                   >
-                    Next
+                    {activeSectionIndex === sections.length - 1
+                      ? "Finish"
+                      : "Next"}
                     <ChevronRight className="size-4" />
                   </button>
                 </div>
